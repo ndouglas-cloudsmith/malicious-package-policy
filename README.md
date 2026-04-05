@@ -96,7 +96,7 @@ Test the policy:
 opa eval -d policy.rego -i input.json "data.example.violation"
 ```
 
-Confirm the ```npm``` package is marked as malicious in the OSV dataset:
+**[MAL-2025-48401](https://osv.dev/vulnerability/MAL-2025-48401)**: Confirm the ```npm``` package is marked as malicious in the OSV dataset:
 ```
 curl -d \
   '{"version": "1.10.2",
