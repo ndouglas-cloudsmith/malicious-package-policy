@@ -1,0 +1,9 @@
+{
+    "packages": [
+        {
+            "name": "malicious-pkg",
+            "version": "1.2.3",
+            "ecosystem": "npm"
+        }
+    ]
+}
