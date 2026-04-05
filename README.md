@@ -60,6 +60,16 @@ allow if {
 EOF
 ```
 
+#### Test Violation
+```
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/test-violation/policy.rego
+```
+
+When you run ```opa eval```, you now want to target ```data.example.violation```.
+```
+opa eval -d policy.rego -i input.json "data.example.violation" --format values
+```
+
 #### Understanding the OPA CLI Workflow
 When you run ```opa eval```, the engine performs a "three-way merge" to get your answer:
 
