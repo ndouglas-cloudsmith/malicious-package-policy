@@ -1,0 +1,9 @@
+{
+    "packages": [
+        {
+            "name": "supplychain-firewall-benchmark-hello",
+            "version": "1.10.2",
+            "ecosystem": "npm"
+        }
+    ]
+}
