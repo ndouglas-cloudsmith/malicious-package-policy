@@ -48,6 +48,7 @@ cat <<EOF > input.json
 EOF
 ```
 
+Simple ```policy.rego``` example:
 ```
 cat <<EOF > policy.rego
 package example
@@ -62,7 +63,10 @@ EOF
 
 #### Test Violation
 ```
+rm policy.rego
+rm input.json
 wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/test-violation/policy.rego
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/test-violation/input.json
 ```
 
 When you run ```opa eval```, you now want to target ```data.example.violation```.
