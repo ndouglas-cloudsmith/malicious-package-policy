@@ -54,8 +54,7 @@ package example
 
 default allow = false
 
-# For now, let's just say it's allowed if the package name isn't "malicious-pkg"
-allow {
+allow if {
     input.packages[_].name != "malicious-pkg"
 }
 EOF
