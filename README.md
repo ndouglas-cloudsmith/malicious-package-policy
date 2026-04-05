@@ -81,6 +81,21 @@ When you run ```opa eval```, the engine performs a "three-way merge" to get your
 - ```-i input.json``` loads the specific object you want to test (called the **Subject**).
 - ```"data.example.allow"``` tells OPA exactly which rule inside the policy you want to see the result of.
 
+#### Querying the OSV API to check if template is safe
+
+As always, clear out the old manifests and download the correct ```rego``` and ```input``` data for the policy control
+```
+rm policy.rego
+rm input.json
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/osv-api/policy.rego
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/osv-api/input.json
+```
+
+Test the policy:
+```
+opa eval -d policy.rego -i input.json "data.example.violation" --format values
+```
+
 #### 3. The Server Mode (run --server)
 This is how you use OPA as a sidecar or a central microservice. It exposes a REST API.
 
