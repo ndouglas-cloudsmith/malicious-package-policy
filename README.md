@@ -93,7 +93,15 @@ wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-pol
 
 Test the policy:
 ```
-opa eval -d policy.rego -i input.json "data.example.violation" --format values
+opa eval -d policy.rego -i input.json "data.example.violation"
+```
+
+Confirm the ```npm``` package is marked as malicious in the OSV dataset:
+```
+curl -d \
+  '{"version": "1.10.2",
+    "package": {"name": "supplychain-firewall-benchmark-hello", "ecosystem": "npm"}}' \
+  "https://api.osv.dev/v1/query"
 ```
 
 #### 3. The Server Mode (run --server)
