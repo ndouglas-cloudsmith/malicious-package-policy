@@ -1,0 +1,24 @@
+{
+  "packages": [
+    {
+      "name": "axios",
+      "version": "1.4.1",
+      "ecosystem": "npm"
+    },
+    {
+      "name": "axios",
+      "version": "0.21.1",
+      "ecosystem": "npm"
+    },
+    {
+      "name": "requests",
+      "version": "2.31.0",
+      "ecosystem": "pypi"
+    },
+    {
+      "name": "pandas",
+      "version": "2.0.3",
+      "ecosystem": "pypi"
+    }
+  ]
+}
