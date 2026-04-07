@@ -6,7 +6,7 @@ On my local ```macOS``` workstation, I will be using ```Homebrew``` to install O
 brew install opa
 ```
 
-However, for ```Linux``` endpoints, we need to download the binary, ake it executable, and move it to your path:
+However, for ```Linux``` endpoints, we need to download the binary, make it executable, and move it to your path:
 ```
 curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
 chmod 755 opa
@@ -98,10 +98,10 @@ opa eval -d policy.rego -i input.json "data.example.violation"
 
 **[MAL-2025-48401](https://osv.dev/vulnerability/MAL-2025-48401)**: Confirm the ```npm``` package is marked as malicious in the OSV dataset:
 ```
-curl -d \
+curl -s -d \
   '{"version": "1.10.2",
     "package": {"name": "supplychain-firewall-benchmark-hello", "ecosystem": "npm"}}' \
-  "https://api.osv.dev/v1/query"
+  "https://api.osv.dev/v1/query" | jq .
 ```
 
 #### 3. The Server Mode (run --server)
