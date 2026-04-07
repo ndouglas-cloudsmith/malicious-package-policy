@@ -104,6 +104,26 @@ curl -s -d \
   "https://api.osv.dev/v1/query" | jq .
 ```
 
+#### Querying the OSM API to check if new template is safe
+
+As always, clear out the old manifests and download the correct ```rego``` and ```input``` data for the policy control
+```
+rm policy.rego
+rm input.json
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/osm-api/policy.rego
+wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-policy/refs/heads/main/osm-api/input.json
+```
+
+Test the policy:
+```
+opa eval -d policy.rego -i input.json "data.example.violation"
+```
+
+**[OpenSourceMalware](https://opensourcemalware.com/npm/axios)** already flags the ```axios``` package as malicious:
+```
+curl -X GET "https://api.opensourcemalware.com/functions/v1/check-malicious?report_type=package&resource_identifier=axios&ecosystem=npm" -H "Authorization: Bearer $OSM_KEY" | jq
+```
+
 #### 3. The Server Mode (run --server)
 This is how you use OPA as a sidecar or a central microservice. It exposes a REST API.
 
