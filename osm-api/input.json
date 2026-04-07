@@ -16,6 +16,11 @@
       "ecosystem": "pypi"
     },
     {
+      "name": "litellm",
+      "version": "1.82.7",
+      "ecosystem": "pypi"
+    },    
+    {
       "name": "pandas",
       "version": "2.0.3",
       "ecosystem": "pypi"
