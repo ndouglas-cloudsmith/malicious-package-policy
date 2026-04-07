@@ -3,12 +3,11 @@ package example
 import future.keywords.if
 import future.keywords.in
 
-# 1. Internal rule to identify malicious packages (Hides Key)
-# This won't show up in your output unless you specifically query it.
-is_malicious_package[pkg.name] if {
+# 1. Gather all info about malicious packages in one structured object
+# This maps the package name to its full API response details
+_malicious_details[pkg.name] := response.body if {
     some pkg in input.packages
     
-    # Key is local here, so it won't leak to the global document
     osm_key := opa.runtime().env.OSM_KEY
     osm_key != ""
 
@@ -29,34 +28,21 @@ is_malicious_package[pkg.name] if {
     response.body.malicious == true
 }
 
-# 2. The Detailed Violation Output (The one you liked)
+# 2. Violation Messages (The format you wanted)
 violation[msg] if {
-    some name in is_malicious_package
-    
-    # We re-fetch the description here (OPA caches the http.send call 
-    # from above, so this doesn't actually hit the network again)
-    some pkg in input.packages
-    pkg.name == name
-    
-    osm_key := opa.runtime().env.OSM_KEY
-    params := urlquery.encode_object({"report_type": "package", "resource_identifier": name, "ecosystem": pkg.ecosystem})
-    url := sprintf("https://api.opensourcemalware.com/functions/v1/check-malicious?%s", [params])
-    
-    response := http.send({
-        "method": "GET",
-        "url": url,
-        "headers": {"Authorization": sprintf("Bearer %s", [osm_key])}
-    })
-
-    msg := sprintf("BLOCKING INSTALL: '%s' is MALICIOUS. Description: %s", [name, response.body.details.description])
+    # Iterate over the keys (names) and values (details) of our helper object
+    some name, details in _malicious_details
+    msg := sprintf("BLOCKING INSTALL: '%s' is MALICIOUS. Description: %s", [name, details.details.description])
 }
 
-# 3. Simple list of safe packages
+# 3. Safe Packages
 safe_packages[pkg.name] if {
     some pkg in input.packages
-    not is_malicious_package[pkg.name]
+    # If the name isn't a key in our malicious details object, it's safe
+    not _malicious_details[pkg.name]
 }
 
+# 4. Decision Logic
 allow if {
-    count(is_malicious_package) == 0
+    count(_malicious_details) == 0
 }
