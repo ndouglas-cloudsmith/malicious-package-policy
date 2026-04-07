@@ -3,13 +3,13 @@ package example
 import future.keywords.if
 import future.keywords.in
 
-osm_key := opa.runtime().env.OSM_KEY
-
-# 1. The "Naughty List" (Violations)
-# This identifies specific packages that are malicious
-violation[pkg_name] if {
-    some pkg in input.packages
+# 1. Detailed Violation Messages
+violation[msg] if {
+    # Move the key inside the rule so it isn't globally exported to the JSON output
+    osm_key := opa.runtime().env.OSM_KEY
     osm_key != ""
+
+    some pkg in input.packages
     
     params := urlquery.encode_object({
         "report_type": "package",
@@ -26,17 +26,25 @@ violation[pkg_name] if {
     })
 
     response.body.malicious == true
-    pkg_name := pkg.name
+    
+    # This restores your descriptive string output
+    msg := sprintf("BLOCKING INSTALL: '%s' is MALICIOUS. Description: %s", [pkg.name, response.body.details.description])
 }
 
-# 2. The "Nice List" (Safe)
-# This returns any package name that is NOT in the violation set
+# 2. Simple list of safe packages
+# We use a separate rule for 'safe' so it doesn't clutter the violation messages
 safe_packages[pkg.name] if {
     some pkg in input.packages
-    not violation[pkg.name]
+    # A package is safe if its NAME does not appear in any violation message
+    not some_violation_contains(pkg.name)
 }
 
-# 3. Final Decision Logic
+# Helper to link the name to the long description string
+some_violation_contains(name) if {
+    some msg in violation
+    contains(msg, sprintf("'%s'", [name]))
+}
+
 allow if {
     count(violation) == 0
 }
