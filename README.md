@@ -118,7 +118,7 @@ wget https://raw.githubusercontent.com/ndouglas-cloudsmith/malicious-package-pol
 
 Test the policy:
 ```
-opa eval -d policy.rego -i input.json "data.example.violation"
+opa eval -d policy.rego -i input.json "data.example.violation" --format pretty
 ```
 
 **[OpenSourceMalware](https://opensourcemalware.com/npm/axios)** already flags the ```axios``` package as malicious:
