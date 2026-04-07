@@ -3,14 +3,15 @@ package example
 import future.keywords.if
 import future.keywords.in
 
-# 1. Detailed Violation Messages
-violation[msg] if {
-    # Move the key inside the rule so it isn't globally exported to the JSON output
+# 1. Internal rule to identify malicious packages (Hides Key)
+# This won't show up in your output unless you specifically query it.
+is_malicious_package[pkg.name] if {
+    some pkg in input.packages
+    
+    # Key is local here, so it won't leak to the global document
     osm_key := opa.runtime().env.OSM_KEY
     osm_key != ""
 
-    some pkg in input.packages
-    
     params := urlquery.encode_object({
         "report_type": "package",
         "resource_identifier": pkg.name,
@@ -26,25 +27,36 @@ violation[msg] if {
     })
 
     response.body.malicious == true
-    
-    # This restores your descriptive string output
-    msg := sprintf("BLOCKING INSTALL: '%s' is MALICIOUS. Description: %s", [pkg.name, response.body.details.description])
 }
 
-# 2. Simple list of safe packages
-# We use a separate rule for 'safe' so it doesn't clutter the violation messages
+# 2. The Detailed Violation Output (The one you liked)
+violation[msg] if {
+    some name in is_malicious_package
+    
+    # We re-fetch the description here (OPA caches the http.send call 
+    # from above, so this doesn't actually hit the network again)
+    some pkg in input.packages
+    pkg.name == name
+    
+    osm_key := opa.runtime().env.OSM_KEY
+    params := urlquery.encode_object({"report_type": "package", "resource_identifier": name, "ecosystem": pkg.ecosystem})
+    url := sprintf("https://api.opensourcemalware.com/functions/v1/check-malicious?%s", [params])
+    
+    response := http.send({
+        "method": "GET",
+        "url": url,
+        "headers": {"Authorization": sprintf("Bearer %s", [osm_key])}
+    })
+
+    msg := sprintf("BLOCKING INSTALL: '%s' is MALICIOUS. Description: %s", [name, response.body.details.description])
+}
+
+# 3. Simple list of safe packages
 safe_packages[pkg.name] if {
     some pkg in input.packages
-    # A package is safe if its NAME does not appear in any violation message
-    not some_violation_contains(pkg.name)
-}
-
-# Helper to link the name to the long description string
-some_violation_contains(name) if {
-    some msg in violation
-    contains(msg, sprintf("'%s'", [name]))
+    not is_malicious_package[pkg.name]
 }
 
 allow if {
-    count(violation) == 0
+    count(is_malicious_package) == 0
 }
